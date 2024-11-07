@@ -1,0 +1,2 @@
+# vault.yml
+ansible_become_password: "Azerty123"
