@@ -30,3 +30,36 @@
       ansible.builtin.service:
         name: ssh
         state: restarted
+        
+    # Installation du logiciel test.elf
+    - name: Télécharger le fichier test.elf.zip depuis le dépôt
+      ansible.builtin.get_url:
+        url: "http://software_depot/test.elf.zip"
+        dest: "/tmp/test.elf.zip"
+        mode: '0644'
+
+    - name: Décompresser test.elf.zip
+      ansible.builtin.unarchive:
+        src: "/tmp/test.elf.zip"
+        dest: "/opt/software/"
+        remote_src: true
+
+    - name: Installer test.elf
+      ansible.builtin.command: "chmod +x /opt/software/test.elf && /opt/software/test.elf --install"
+      register: install_result
+      failed_when: install_result.rc != 0
+
+    - name: Vérifier l'installation de test.elf
+      ansible.builtin.stat:
+        path: "/opt/software/test.elf"
+      register: elf_check
+
+    - name: Retourner le résultat de l'installation
+      ansible.builtin.debug:
+        msg: "Installation réussie de test.elf." 
+      when: elf_check.stat.exists
+
+    - name: Erreur d'installation de test.elf
+      ansible.builtin.fail:
+        msg: "L'installation de test.elf a échoué."
+      when: not elf_check.stat.exists
