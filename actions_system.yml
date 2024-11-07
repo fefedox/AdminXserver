@@ -2,11 +2,14 @@
 ---
 - name: Exécution d'actions système sur plusieurs serveurs
   hosts: mon_groupe
-  become: true   # S'assure d'exécuter les commandes avec les privilèges sudo
+  become: true   # Utilise les privilèges sudo pour les actions système
   gather_facts: false
 
+  vars_files:
+    - vault.yml  # Inclut le fichier chiffré avec Ansible Vault
+
   tasks:
-    - name: Mettre à jour tous les paquets
+    - name: Mettre à jour tous les paquets (RedHat/CentOS)
       ansible.builtin.yum:
         name: "*"
         state: latest
