@@ -1,0 +1,29 @@
+# actions_system.yml
+---
+- name: Exécution d'actions système sur plusieurs serveurs
+  hosts: mon_groupe
+  become: true   # S'assure d'exécuter les commandes avec les privilèges sudo
+  gather_facts: false
+
+  tasks:
+    - name: Mettre à jour tous les paquets
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
+
+    - name: Mettre à jour tous les paquets (Debian/Ubuntu)
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+    - name: Créer un utilisateur "utilisateur_test" avec un mot de passe
+      ansible.builtin.user:
+        name: utilisateur_test
+        password: "{{ 'mot_de_passe' | password_hash('sha512') }}"
+
+    - name: Redémarrer le service SSH
+      ansible.builtin.service:
+        name: ssh
+        state: restarted
